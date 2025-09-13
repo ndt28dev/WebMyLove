@@ -45,7 +45,7 @@ export default function Header() {
     }
 
     return (
-      <Link key={link.label} href={link.link} className={classes.link}>
+      <Link key={link.label} href={link.link || "#"} className={classes.link}>
         {link.label}
       </Link>
     );

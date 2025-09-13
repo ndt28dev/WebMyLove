@@ -4701,24 +4701,23 @@ export const loveTimelineData: ILoveTimeline[] = [
   },
   {
     id: 61,
-    date: new Date("2025-06-25"),
+    date: new Date("2025-4-19"),
     title: "Đi ăn với em",
-    description:
-      "Một bữa ăn nhỏ nhưng ngọt ngào, lưu giữ trong 3 tấm hình đáng nhớ.",
+    description: "Một bữa ăn nhỏ sau nhiều ngày xa em khi em phải đi quân sự.",
     icon: LoveType.DINNER,
     photos: [
       {
-        url: "/img/timeline/61/1.jpg",
+        url: "/img/timeline/61/61-1.jpg",
         type: "image",
         caption: "Tin nhắn đầu tiên",
       },
       {
-        url: "/img/timeline/61/2.jpg",
+        url: "/img/timeline/61/61-2.jpg",
         type: "image",
         caption: "Tin nhắn đầu tiên",
       },
       {
-        url: "/img/timeline/61/3.jpg",
+        url: "/img/timeline/61/61-3.jpg",
         type: "image",
         caption: "Tin nhắn đầu tiên",
       },
