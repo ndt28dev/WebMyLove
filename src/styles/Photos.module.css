@@ -1,0 +1,20 @@
+.albumCard {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.albumCard:hover {
+  transform: translateY(-4px); /* nhít lên 4px */
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12); /* bóng đổ nhẹ */
+}
+
+.cover {
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+/* Tôn trọng người dùng hạn chế animation */
+@media (prefers-reduced-motion: reduce) {
+  .albumCard,
+  .cover {
+    transition: none;
+  }
+}

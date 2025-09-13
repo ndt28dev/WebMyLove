@@ -1,0 +1,45 @@
+Các trang chính (Pages)
+
+Trang chủ (Home)
+
+Lời chào / thông điệp dễ thương.
+
+Một ảnh nền hoặc animation về chủ đề tình yêu/kỷ niệm.
+
+Có thể thêm “ngày kỷ niệm chính” (ví dụ: ngày quen nhau, kỷ niệm 100 ngày, 1 năm, …).
+
+Album ảnh (Gallery / Memories)
+
+Dạng timeline hiển thị ảnh theo từng mốc thời gian.
+
+Có thể bấm vào ảnh để mở popup xem chi tiết, kèm lời nhắn.
+
+Câu chuyện (Story / Journal)
+
+Nơi viết lại những khoảnh khắc, chuyến đi, hoặc nhật ký ngắn.
+
+Có thể hiển thị như blog, hoặc dạng timeline (ngày – sự kiện – nội dung).
+
+Mốc thời gian (Timeline)
+
+Hiển thị theo kiểu “roadmap” từ ngày đầu tiên đến hiện tại.
+
+Ví dụ: Ngày quen nhau → Ngày đi chơi lần đầu → Sinh nhật → Lễ kỷ niệm…
+
+Thư tình (Letters)
+
+Một nơi để viết thư online (text, hoặc thậm chí ghi âm giọng nói).
+
+Có thể set chế độ “mở khóa” theo ngày (ví dụ: chỉ xem được vào 14/2).
+
+Âm nhạc & Video (Playlist)
+
+Nhúng playlist YouTube/Spotify những bài hát gắn liền với kỷ niệm.
+
+Có thể kèm video clip chung.
+
+Mini Games / Quizzes (thêm phần vui vẻ)
+
+Trắc nghiệm nhỏ kiểu: “Ai nhớ kỷ niệm này?”
+
+Game nhỏ (ví dụ: puzzle ghép ảnh chung).

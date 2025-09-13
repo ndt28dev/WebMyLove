@@ -1,12 +1,27 @@
 :root {
+  /* Light mode */
   --background: #ffffff;
   --foreground: #171717;
+
+  /* 🎨 Love theme colors */
+  --love-primary: #e84393; /* Hồng đậm */
+  --love-secondary: #ff4d6d; /* Đỏ hồng */
+  --love-accent: #ff6b81; /* Hồng đào */
+  --love-pink: #ff9a9e; /* Pastel hồng */
+  --love-blue: #a18cd1; /* Pastel xanh tím */
+
+  --love-text-light: #ffffff;
+  --love-text-dark: #2c2c2c;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+
+    /* Dark mode versions nếu cần */
+    --love-primary: #ff6b9a;
+    --love-secondary: #ff5c7a;
   }
 }
 
