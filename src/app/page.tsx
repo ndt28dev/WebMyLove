@@ -89,7 +89,7 @@ export default function WelcomePage() {
           height: "100vh",
           width: "100%",
           backgroundImage: "url('/img/bgr1.jpg')",
-          backgroundSize: "cover",
+          backgroundSize: "contain",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center",
           display: "flex",
@@ -134,7 +134,7 @@ export default function WelcomePage() {
           <MyButton
             icon={<IconHeart size={18} />}
             size="lg"
-            onClick={() => router.push("/pass")}
+            onClick={() => router.push("/home")}
           >
             Khám phá tình yêu
           </MyButton>

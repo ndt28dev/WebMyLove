@@ -1257,6 +1257,12 @@ export const photoAlbums: IPhotoAlbum[] = [
       { id: 102, url: "/img/albums/veque/q-102.jpg", type: "image" },
       { id: 103, url: "/img/albums/veque/q-103.jpg", type: "image" },
       { id: 104, url: "/img/albums/veque/q-104.jpg", type: "image" },
+      { id: 105, url: "/img/albums/veque/65-1.jpg", type: "image" },
+      { id: 106, url: "/img/albums/veque/65-2.jpg", type: "image" },
+      { id: 107, url: "/img/albums/veque/65-3.jpg", type: "image" },
+      { id: 108, url: "/img/albums/veque/65-4.jpg", type: "image" },
+      { id: 109, url: "/img/albums/veque/65-5.jpg", type: "image" },
+      { id: 110, url: "/img/albums/veque/65-6.jpg", type: "image" },
       // Video
       { id: 105, url: "/img/albums/veque/qv-1.mp4", type: "video" },
       { id: 106, url: "/img/albums/veque/qv-2.mp4", type: "video" },

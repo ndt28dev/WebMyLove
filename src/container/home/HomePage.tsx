@@ -15,8 +15,8 @@ export default function HomePage() {
         <TimeReal />
         <LoveStoryPage />
         <BlogCarousel />
-        <PlaylistSection />
-        <MiniGamesHubPage />
+        {/* <PlaylistSection /> */}
+        {/* <MiniGamesHubPage /> */}
       </Stack>
     </Container>
   );

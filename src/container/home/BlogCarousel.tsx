@@ -78,7 +78,7 @@ export default function BlogCarousel() {
                   <Text size="sm" lineClamp={2}>
                     {blog.details[0]?.description}
                   </Text>
-                  <Button
+                  {/* <Button
                     size="sm"
                     radius="sm"
                     variant="filled"
@@ -89,7 +89,7 @@ export default function BlogCarousel() {
                     }}
                   >
                     Xem chi tiết
-                  </Button>
+                  </Button> */}
                 </Stack>
               </Box>
             </Card>

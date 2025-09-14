@@ -18,6 +18,7 @@ import {
   Stack,
   Text,
   Title,
+  useMantineTheme,
 } from "@mantine/core";
 import {
   IconCalendarHeart,
@@ -31,6 +32,7 @@ import {
   ILovePhoto,
   ILoveTimeline,
 } from "@/modules/interface/ILoveTimeline";
+import { useMediaQuery } from "@mantine/hooks";
 
 const typeLabel: Record<LoveType, string> = {
   [LoveType.MEET_DAY]: "Gặp nhau",
@@ -131,6 +133,10 @@ export default function TimelineHome() {
   const handleSelect = (idx: number) => {
     setActiveIdx(idx);
     setPhotoIdx(0);
+
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
@@ -140,7 +146,7 @@ export default function TimelineHome() {
           <>
             <Stack gap={2}>
               <Title order={4} style={{ lineHeight: 1.2 }}>
-                {activeItem.id} - {activeItem.title}
+                {activeItem.title}
               </Title>
               <Group gap={6} align="center">
                 <IconCalendarHeart size={16} color="#FF4D6D" />
@@ -280,7 +286,7 @@ export default function TimelineHome() {
             </Button>
           </Group>
         </Paper>
-        <ScrollArea.Autosize mah={"650"} maw="100%" pr="md">
+        <ScrollArea.Autosize mah={"750"} maw="100%" pr="md">
           <MyTimeline
             loveTimelineData={filteredData}
             onSelect={handleSelect}

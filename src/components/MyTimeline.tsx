@@ -103,7 +103,7 @@ export function MyTimeline({
                     onSelect?.(idx);
                   }}
                 >
-                  {item.id} - {item.title}
+                  {item.title}
                 </Title>
                 <Badge bg="#FF4D6D" radius="md">
                   {formatDate(item.date)}

@@ -12,10 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <>
-      123
-      {/* <Header />
+      <Header />
       <Container fluid>{children}</Container>
-      <Footer /> */}
+      <Footer />
     </>
   );
 }

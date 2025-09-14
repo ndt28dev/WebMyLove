@@ -38,3 +38,19 @@
 .linkLabel {
   margin-right: 5px;
 }
+
+.linkActive {
+  background-color: light-dark(
+    var(--mantine-color-pink-0),
+    var(--mantine-color-dark-6)
+  );
+  color: light-dark(var(--mantine-color-pink-7), var(--mantine-color-pink-3));
+}
+
+.menuItemActive {
+  background-color: light-dark(
+    var(--mantine-color-pink-0),
+    var(--mantine-color-dark-6)
+  );
+  color: light-dark(var(--mantine-color-pink-7), var(--mantine-color-pink-3));
+}
