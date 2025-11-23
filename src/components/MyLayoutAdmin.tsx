@@ -1,5 +1,4 @@
 import { Divider, Stack, Title } from "@mantine/core";
-import MyDataTable from "./MyDataTable";
 
 type Props = {
   children: React.ReactNode;
