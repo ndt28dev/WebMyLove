@@ -1,7 +1,7 @@
 import { IPhoto } from "./IPhoto";
 
 export interface IPhotoAlbum {
-  id: number;
+  id: string;
   title: string;
   description?: string;
   coverImage: string;

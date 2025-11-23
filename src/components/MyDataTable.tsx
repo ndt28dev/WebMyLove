@@ -1,126 +1,119 @@
-"use client";
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
-  MantineReactTable,
-  useMantineReactTable,
-  type MRT_ColumnDef,
-} from "mantine-react-table";
-import { TextInput, Box } from "@mantine/core";
+  Avatar,
+  Checkbox,
+  Flex,
+  Group,
+  ScrollArea,
+  Table,
+  Text,
+  TextInput,
+} from "@mantine/core";
 
-type Person = {
-  name: {
-    firstName: string;
-    lastName: string;
-  };
-  address: string;
-  city: string;
-  state: string;
-};
+interface Column<T> {
+  key: keyof T;
+  title: string;
+  render?: (row: T) => React.ReactNode;
+  width?: number | string;
+}
 
-const data: Person[] = [
-  {
-    name: { firstName: "Zachary", lastName: "Davis" },
-    address: "261 Battle Ford",
-    city: "Columbus",
-    state: "Ohio",
-  },
-  {
-    name: { firstName: "Robert", lastName: "Smith" },
-    address: "566 Brakus Inlet",
-    city: "Westerville",
-    state: "West Virginia",
-  },
-  {
-    name: { firstName: "Kevin", lastName: "Yan" },
-    address: "7777 Kuhic Knoll",
-    city: "South Linda",
-    state: "West Virginia",
-  },
-  {
-    name: { firstName: "John", lastName: "Upton" },
-    address: "722 Emie Stream",
-    city: "Huntington",
-    state: "Washington",
-  },
-  {
-    name: { firstName: "Nathan", lastName: "Harris" },
-    address: "1 Kuhic Knoll",
-    city: "Ohiowa",
-    state: "Nebraska",
-  },
-];
+interface MyDataTableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  renderAddButton?: () => React.ReactNode;
+  renderActions?: (row: T) => React.ReactNode;
+}
 
-const MyDataTable = () => {
-  const columns = useMemo<MRT_ColumnDef<Person>[]>(
-    () => [
-      { accessorKey: "name.firstName", header: "First Name" },
-      { accessorKey: "name.lastName", header: "Last Name" },
-      { accessorKey: "address", header: "Address" },
-      { accessorKey: "city", header: "City" },
-      { accessorKey: "state", header: "State" },
-    ],
-    []
+export function MyDataTable<T extends { id: string }>({
+  data,
+  columns,
+  renderAddButton,
+  renderActions,
+}: MyDataTableProps<T>) {
+  const [search, setSearch] = useState("");
+  const [selection, setSelection] = useState<string[]>([]);
+
+  const filteredData = useMemo(
+    () =>
+      data.filter((item) =>
+        Object.values(item).some((v) =>
+          String(v).toLowerCase().includes(search.toLowerCase())
+        )
+      ),
+    [data, search]
   );
 
-  const table = useMantineReactTable({
-    columns,
-    data,
-    // nếu muốn ẩn global filter mặc định (nếu có), có thể tắt column filters / global filter UI mặc định:
-    // enableToolbarInternalActions: true, // giữ mặc định toolbar actions (tuỳ bạn)
-    // enableGlobalFilterModes: false, // tùy feature flags
-    // --- Tùy chọn quan trọng: mình render ô tìm riêng ở top + render footer custom ---
-    renderTopToolbarCustomActions: ({ table }) => {
-      return (
-        <Box
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            width: "100%",
-            gap: 8,
-          }}
-        >
-          <TextInput
-            placeholder="Tìm kiếm..."
-            // Lấy giá trị hiện tại của global filter (hoặc empty string)
-            value={(table.getState().globalFilter ?? "") as string}
-            onChange={(e) => {
-              table.setGlobalFilter(e.target.value || undefined);
-            }}
-            style={{ width: 320 }}
-          />
-        </Box>
-      );
-    },
-    renderBottomToolbarCustomActions: ({ table }) => {
-      return (
-        <Box
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            width: "100%",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          {/* Bạn có thể thêm bất kỳ action footer nào ở đây.
-              Ví dụ: hiện text tổng số rows + nút custom */}
-          <div>
-            {`Rows: ${
-              table.getState().pagination.pageIndex *
-                table.getState().pagination.pageSize +
-              1
-            } - ${Math.min(
-              (table.getState().pagination.pageIndex + 1) *
-                table.getState().pagination.pageSize,
-              table.getRowModel().rows.length
-            )} / ${table.getRowModel().rows.length}`}
-          </div>
-        </Box>
-      );
-    },
-  });
+  const toggleRow = (id: string) =>
+    setSelection((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
 
-  return <MantineReactTable table={table} />;
-};
+  const toggleAll = () =>
+    setSelection((current) =>
+      current.length === filteredData.length
+        ? []
+        : filteredData.map((item) => item.id)
+    );
 
-export default MyDataTable;
+  return (
+    <>
+      <Flex mb="sm" align="center" justify="space-between">
+        <Group>{renderAddButton && renderAddButton()}</Group>
+        <TextInput
+          placeholder="Tìm kiếm..."
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          style={{ width: 300 }}
+        />
+      </Flex>
+
+      <ScrollArea>
+        <Table miw={800} verticalSpacing="sm">
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th w={40}>
+                <Checkbox
+                  onChange={toggleAll}
+                  checked={
+                    selection.length === filteredData.length &&
+                    filteredData.length > 0
+                  }
+                  indeterminate={
+                    selection.length > 0 &&
+                    selection.length !== filteredData.length
+                  }
+                />
+              </Table.Th>
+              {columns.map((col) => (
+                <Table.Th key={String(col.key)} w={col.width}>
+                  {col.title}
+                </Table.Th>
+              ))}
+              {renderActions && <Table.Th>Actions</Table.Th>}
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {filteredData.map((row) => (
+              <Table.Tr key={row.id}>
+                <Table.Td>
+                  <Checkbox
+                    checked={selection.includes(row.id)}
+                    onChange={() => toggleRow(row.id)}
+                  />
+                </Table.Td>
+                {columns.map((col) => (
+                  <Table.Td key={String(col.key)}>
+                    {col.render ? col.render(row) : String(row[col.key])}
+                  </Table.Td>
+                ))}
+                {renderActions && <Table.Td>{renderActions(row)}</Table.Td>}
+              </Table.Tr>
+            ))}
+          </Table.Tbody>
+        </Table>
+      </ScrollArea>
+    </>
+  );
+}
