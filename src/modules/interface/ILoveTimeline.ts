@@ -13,16 +13,17 @@ export const iconColorMapper: Record<LoveType, MantineColor | string> = {
 };
 
 export interface ILovePhoto {
+  id: number;
   url: string;
   type?: string;
   caption?: string;
 }
 
 export interface ILoveTimeline {
-  id: number;
-  date: Date;
-  title: string;
-  description: string;
-  icon: LoveType;
+  id?: number;
+  date?: Date;
+  title?: string;
+  description?: string;
+  icon?: LoveType;
   photos?: ILovePhoto[];
 }

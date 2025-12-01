@@ -1,6 +1,6 @@
 "use client";
 import { MyTimeline } from "@/components/MyTimeline";
-import { loveTimelineData } from "@/modules/data/timeline/data";
+// remove static import of loveTimelineData
 import { formatDate } from "@/utils/Format";
 import {
   ActionIcon,
@@ -19,6 +19,8 @@ import {
   Text,
   Title,
   useMantineTheme,
+  Loader,
+  Center,
 } from "@mantine/core";
 import {
   IconCalendarHeart,
@@ -50,6 +52,41 @@ export default function TimelineHome() {
   const [yearFilter, setYearFilter] = useState<string | null>(null);
   const [monthFilter, setMonthFilter] = useState<string | null>(null);
 
+  // new: timeline data from API
+  const [timelineData, setTimelineData] = useState<ILoveTimeline[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // fetch data from API
+  useEffect(() => {
+    const ctrl = new AbortController();
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("http://localhost:4000/api/timeline", {
+          signal: ctrl.signal,
+        });
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} ${res.statusText}`);
+        }
+        const json = await res.json();
+        // expect json is an array of timeline items; adjust if nested
+        setTimelineData(Array.isArray(json) ? json : json.data ?? []);
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        console.error("Fetch timeline error:", err);
+        setError(err.message || "Lỗi khi tải dữ liệu");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    return () => ctrl.abort();
+  }, []);
+
+  // type options unchanged
   const typeOptions = useMemo(
     () => [
       { value: "all", label: "Tất cả loại" },
@@ -61,14 +98,19 @@ export default function TimelineHome() {
     []
   );
 
+  // year options computed from timelineData
   const yearOptions = useMemo(() => {
     const years = Array.from(
-      new Set(loveTimelineData.map((i) => new Date(i.date).getFullYear()))
+      new Set(
+        timelineData
+          .filter((i) => i.date !== undefined) // Add this line
+          .map((i) => new Date(i.date!).getFullYear())
+      )
     )
       .sort((a, b) => b - a)
       .map((y) => ({ value: String(y), label: String(y) }));
     return years;
-  }, []);
+  }, [timelineData]);
 
   const monthOptions = useMemo(
     () =>
@@ -85,23 +127,25 @@ export default function TimelineHome() {
     setMonthFilter(null);
   };
 
+  // filtered data now based on timelineData
   const filteredData = useMemo<ILoveTimeline[]>(() => {
-    return loveTimelineData.filter((item) => {
-      const d = new Date(item.date);
+    return timelineData.filter((item) => {
+      const d = item.date ? new Date(item.date) : new Date();
       if (typeFilter !== "all" && item.icon !== typeFilter) return false;
       if (yearFilter && d.getFullYear() !== Number(yearFilter)) return false;
       if (monthFilter && d.getMonth() + 1 !== Number(monthFilter)) return false;
       return true;
     });
-  }, [typeFilter, yearFilter, monthFilter]);
+  }, [timelineData, typeFilter, yearFilter, monthFilter]);
 
   const [activeIdx, setActiveIdx] = useState<number>(0);
   const [photoIdx, setPhotoIdx] = useState<number>(0);
 
+  // reset indices when filters or data change
   useEffect(() => {
     setActiveIdx(0);
     setPhotoIdx(0);
-  }, [typeFilter, yearFilter, monthFilter]);
+  }, [typeFilter, yearFilter, monthFilter, timelineData]);
 
   const activeItem = useMemo(
     () => filteredData[activeIdx],
@@ -142,7 +186,13 @@ export default function TimelineHome() {
   return (
     <Grid>
       <Grid.Col span={{ base: 12, md: 6 }}>
-        {activeItem ? (
+        {loading ? (
+          <Center style={{ minHeight: 300 }}>
+            <Loader />
+          </Center>
+        ) : error ? (
+          <Text color="red">{error}</Text>
+        ) : activeItem ? (
           <>
             <Stack gap={2}>
               <Title order={4} style={{ lineHeight: 1.2 }}>
@@ -150,9 +200,11 @@ export default function TimelineHome() {
               </Title>
               <Group gap={6} align="center">
                 <IconCalendarHeart size={16} color="#FF4D6D" />
-                <Text fz="sm" c="dimmed">
-                  {formatDate(activeItem.date)}
-                </Text>
+                {activeItem.date && (
+                  <Text fz="sm" c="dimmed">
+                    {formatDate(activeItem.date)}
+                  </Text>
+                )}
               </Group>
             </Stack>
 
@@ -170,7 +222,7 @@ export default function TimelineHome() {
                   >
                     {current?.type === "image" ? (
                       <img
-                        src={current.url}
+                        src={`http://localhost:4000/public${current?.url}`}
                         alt={current.caption || activeItem.title}
                         style={{
                           width: "100%",
@@ -183,7 +235,7 @@ export default function TimelineHome() {
                     ) : (
                       <Flex direction="column" justify="center" h="600px">
                         <video
-                          src={current?.url}
+                          src={`http://localhost:4000/public${current?.url}`}
                           controls
                           playsInline
                           preload="metadata"
@@ -286,6 +338,7 @@ export default function TimelineHome() {
             </Button>
           </Group>
         </Paper>
+
         <ScrollArea.Autosize mah={"750"} maw="100%" pr="md">
           <MyTimeline
             loveTimelineData={filteredData}

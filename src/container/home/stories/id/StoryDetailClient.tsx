@@ -1,31 +1,30 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState, useMemo } from "react";
 import {
-  Box,
-  Group,
+  Container,
+  Stack,
   Title,
   Text,
   Badge,
   Image,
   AspectRatio,
-  SimpleGrid,
+  Group,
+  Box,
   Modal,
-  Container,
-  Stack,
+  SimpleGrid,
   Flex,
 } from "@mantine/core";
-import { useMemo, useState } from "react";
+import MyBreadcrumbs from "@/components/MyBreadcrumbs";
 import type {
   IStory,
   StoryDetailBlock,
   MediaItem,
 } from "@/modules/interface/IStory";
 import { formatDate } from "@/utils/Format";
-import MyBreadcrumbs from "@/components/MyBreadcrumbs";
 
-/* Full-bleed container: giúp media (1 ảnh/video) tràn 2 mép màn hình để
-   cảm giác “kể chuyện” liền mạch, giống tạp chí. */
+const API_BASE = "http://localhost:4000/api/stories";
+
 function FullBleed({ children }: { children: React.ReactNode }) {
   return (
     <Box ml="calc(50% - 50vw)" mr="calc(50% - 50vw)">
@@ -46,45 +45,25 @@ function NarrativeBlock({
 
   return (
     <Stack gap="xs">
-      {block.title && (
-        <Title order={3} mt="sm" style={{ lineHeight: 1.25 }}>
-          {block.title}
-        </Title>
-      )}
+      {block.title && <Title order={3}>{block.title}</Title>}
+      {block.description && <Text c="dimmed">{block.description}</Text>}
 
-      {block.description && (
-        <Text fz="md" c="dimmed">
-          {block.description}
-        </Text>
-      )}
+      {/* 1 item */}
       {hasOnlyOne ? (
         <Flex direction="column">
-          <AspectRatio
-            ratio={16 / 9}
-            style={{ borderRadius: 12, overflow: "hidden" }}
-          >
+          <AspectRatio ratio={16 / 9}>
             {media[0].type === "image" ? (
               <Image
-                src={media[0].url}
+                src={`http://localhost:4000/public${media[0].url}`}
                 alt={media[0].caption || block.title || "photo"}
                 fit="cover"
-                style={{ cursor: "zoom-in" }}
                 onClick={() => onPreview(media[0])}
-                h={400}
+                style={{ cursor: "zoom-in" }}
               />
             ) : (
               <video
-                src={media[0].url}
+                src={`http://localhost:4000/public${media[0].url}`}
                 controls
-                playsInline
-                preload="metadata"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  background: "#000",
-                  display: "block",
-                }}
               />
             )}
           </AspectRatio>
@@ -95,43 +74,28 @@ function NarrativeBlock({
           )}
         </Flex>
       ) : (
-        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="md">
-          {media.map((m, idx) => (
-            <Box key={idx}>
+        <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }}>
+          {media.map((m) => (
+            <Box key={m.id} onClick={() => m.type === "image" && onPreview(m)}>
               <AspectRatio
-                ratio={m.type === "image" ? 4 / 3 : 4 / 3}
-                style={{
-                  borderRadius: 12,
-                  overflow: "hidden",
-                  cursor: m.type === "image" ? "zoom-in" : "default",
-                }}
-                onClick={() => m.type === "image" && onPreview(m)}
+                ratio={4 / 3}
+                style={{ cursor: m.type === "image" ? "zoom-in" : "default" }}
               >
                 {m.type === "image" ? (
                   <Image
-                    src={m.url}
-                    alt={m.caption || block.title || "photo"}
+                    src={`http://localhost:4000/public${m.url}`}
+                    alt="photo"
                     fit="cover"
                   />
                 ) : (
                   <video
-                    src={m.url}
+                    src={`http://localhost:4000/public${m.url}`}
                     controls
-                    playsInline
-                    preload="metadata"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                      background: "#000",
-                      display: "block",
-                    }}
                   />
                 )}
               </AspectRatio>
-
               {m.caption && (
-                <Text ta={"center"} c="dimmed" fz="sm" mt={6} lineClamp={2}>
+                <Text ta="center" c="dimmed" fz="sm" mt={6}>
                   {m.caption}
                 </Text>
               )}
@@ -143,11 +107,25 @@ function NarrativeBlock({
   );
 }
 
-export default function StoryDetailClient({ story }: { story: IStory }) {
+export default function StoryDetailClient({ id }: { id: string }) {
+  const [story, setStory] = useState<IStory | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [preview, setPreview] = useState<MediaItem | null>(null);
 
-  const blocks = useMemo(() => story.details || [], [story.details]);
+  // 🔥 Fetch story theo ID
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/${id}`);
+        const json = await res.json();
+        setStory(json?.data || json);
+      } catch (err) {
+        console.error("Fetch story error", err);
+      }
+    })();
+  }, [id]);
+
+  const blocks = useMemo(() => story?.details || [], [story]);
 
   const openPreview = (m: MediaItem) => {
     if (m.type !== "image") return;
@@ -155,10 +133,12 @@ export default function StoryDetailClient({ story }: { story: IStory }) {
     setPreviewOpen(true);
   };
 
+  if (!story) return <Text>Đang tải...</Text>;
+
   const items = [
     { title: "Trang chủ", href: "/" },
     { title: "Câu chuyện", href: "/home/stories" },
-    { title: story?.title, href: `/home/stories/${story.id}` }, // MyBreadcrumbs sẽ tự xử lý item cuối
+    { title: story.title, href: `/home/stories/${story.id}` },
   ];
 
   return (
@@ -167,14 +147,21 @@ export default function StoryDetailClient({ story }: { story: IStory }) {
         <MyBreadcrumbs data={items} />
 
         <Group justify="space-between">
+          <div>
+            <Title order={2}>{story.title}</Title>
+            <Badge>{story.date ? formatDate(new Date(story.date)) : ""}</Badge>
+          </div>
           <Group>
-            <div>
-              <Title order={2}>{story.title}</Title>
-              <Badge>{formatDate(story.date)}</Badge>
-            </div>
-          </Group>
-          <Group gap={8} wrap="wrap">
-            {story.tags?.map((t) => (
+            {(Array.isArray(story.tags)
+              ? story.tags
+              : (() => {
+                  try {
+                    return JSON.parse(story.tags as string) as string[];
+                  } catch {
+                    return [];
+                  }
+                })()
+            ).map((t) => (
               <Badge key={t} variant="light" color="pink">
                 {t}
               </Badge>
@@ -182,15 +169,11 @@ export default function StoryDetailClient({ story }: { story: IStory }) {
           </Group>
         </Group>
 
-        {story.summary && (
-          <Text c="dimmed" fz="md">
-            {story.summary}
-          </Text>
-        )}
+        {story.summary && <Text c="dimmed">{story.summary}</Text>}
 
-        <AspectRatio ratio={16 / 9} mb="md">
+        <AspectRatio ratio={16 / 9}>
           <Image
-            src={story.coverImage}
+            src={`http://localhost:4000/public${story.coverImage}`}
             alt={story.title}
             fit="cover"
             radius="md"
@@ -209,25 +192,16 @@ export default function StoryDetailClient({ story }: { story: IStory }) {
           opened={previewOpen}
           onClose={() => setPreviewOpen(false)}
           centered
-          size="auto"
           padding={0}
           withCloseButton={false}
-          overlayProps={{ backgroundOpacity: 0.85, blur: 2 }}
-          styles={{
-            content: { background: "transparent", boxShadow: "none" },
-            body: { padding: 0 },
-          }}
-          zIndex={5000}
         >
           {preview && (
             <Image
-              src={preview.url}
+              src={`http://localhost:4000/public${preview.url}`}
               alt={preview.caption || story.title}
-              maw="95vw"
-              mah="95vh"
               fit="contain"
-              style={{ cursor: "zoom-out" }}
               onClick={() => setPreviewOpen(false)}
+              style={{ cursor: "zoom-out" }}
             />
           )}
         </Modal>

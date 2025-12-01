@@ -7,55 +7,71 @@ import {
   Text,
   Grid,
   Modal,
-  SimpleGrid,
   Title,
   AspectRatio,
-  Box,
   SegmentedControl,
   Flex,
 } from "@mantine/core";
-import classes from "@/styles/Photos.module.css";
+import { useQuery } from "@tanstack/react-query";
 import { IPhotoAlbum } from "@/modules/interface/IPhotoAlbum";
-import { IPhoto } from "@/modules/interface/IPhoto";
-import { photoAlbums } from "@/modules/data/albums/data";
 
-function hasVideo(album?: IPhotoAlbum): boolean {
-  if (!album) return false;
-  return album.photos.some((p) => p.type === "video");
-}
-
-export function countVideos(album?: IPhotoAlbum | null): number {
-  if (!album) return 0;
-  return album.photos.reduce((n, p) => n + (p.type === "video" ? 1 : 0), 0);
-}
-
-export function countImages(album?: IPhotoAlbum | null): number {
-  if (!album) return 0;
+// Hàm tính số lượng ảnh / video
+function countImages(album?: IPhotoAlbum | null): number {
+  if (!album?.photos) return 0;
   return album.photos.reduce((n, p) => n + (p.type === "image" ? 1 : 0), 0);
 }
 
+function countVideos(album?: IPhotoAlbum | null): number {
+  if (!album?.photos) return 0;
+  return album.photos.reduce((n, p) => n + (p.type === "video" ? 1 : 0), 0);
+}
+
+function hasVideo(album?: IPhotoAlbum | null): boolean {
+  if (!album?.photos) return false;
+  return album.photos.some((p) => p.type === "video");
+}
+
+// Component chính
 export default function PhotosHome() {
   const [opened, setOpened] = useState(false);
   const [selectedAlbum, setSelectedAlbum] = useState<IPhotoAlbum | null>(null);
-  const [value, setValue] = useState("image");
+  const [value, setValue] = useState<"image" | "video">("image");
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [preview, setPreview] = useState<{
-    url: string;
-  } | null>(null);
+  const [preview, setPreview] = useState<{ url: string } | null>(null);
+
+  // Fetch albums + photos
+  const {
+    data: albums = [],
+    isLoading,
+    error,
+  } = useQuery<IPhotoAlbum[]>({
+    queryKey: ["albums"],
+    queryFn: async () => {
+      const res = await fetch("http://localhost:4000/api/photos");
+      if (!res.ok) throw new Error("Không lấy được dữ liệu photos");
+      return res.json();
+    },
+  });
 
   const openAlbum = (album: IPhotoAlbum) => {
     setSelectedAlbum(album);
     setOpened(true);
+    setValue("image"); // default view
   };
+
+  if (isLoading) return <Text>Đang tải dữ liệu...</Text>;
+  if (error) return <Text>Lỗi tải dữ liệu</Text>;
 
   const numImages = countImages(selectedAlbum);
   const numVideos = countVideos(selectedAlbum);
 
+  console.log(albums);
+
   return (
     <>
       <Grid>
-        {photoAlbums.map((album) => (
+        {albums.map((album) => (
           <Grid.Col key={album.id} span={{ base: 12, sm: 6, md: 4 }}>
             <Card
               p="xs"
@@ -63,15 +79,13 @@ export default function PhotosHome() {
               radius="sm"
               withBorder
               onClick={() => openAlbum(album)}
-              className={classes.albumCard}
               style={{ cursor: "pointer", overflow: "hidden" }}
             >
               <Image
-                src={album.coverImage}
+                src={`http://localhost:4000/public${album.coverImage}`}
                 alt={album.title}
                 height={300}
                 radius="sm"
-                className={classes.cover}
               />
               <Text fw={600} mt="sm" size="lg">
                 {album.title}
@@ -86,14 +100,12 @@ export default function PhotosHome() {
 
       <Modal
         opened={opened}
-        onClose={() => {
-          setOpened(false), setValue("image");
-        }}
+        onClose={() => setOpened(false)}
         size="100%"
         title={<Title order={3}>{selectedAlbum?.title}</Title>}
         zIndex={1000}
       >
-        <Flex align={"center"} justify={"space-between"} mb={"md"}>
+        <Flex align="center" justify="space-between" mb="md">
           {value === "image" && (
             <Text c="#FF4D6D" mr="md">
               {numImages} ảnh
@@ -104,10 +116,10 @@ export default function PhotosHome() {
               {numVideos} video
             </Text>
           )}
-          {hasVideo(selectedAlbum as IPhotoAlbum) && (
+          {hasVideo(selectedAlbum) && (
             <SegmentedControl
               value={value}
-              onChange={setValue}
+              onChange={(value: string) => setValue(value as "image" | "video")}
               data={[
                 { label: "Ảnh", value: "image" },
                 { label: "Video", value: "video" },
@@ -115,29 +127,24 @@ export default function PhotosHome() {
             />
           )}
         </Flex>
-        <Grid h={"100%"}>
+
+        <Grid h="100%">
           {selectedAlbum?.photos.map((media) => {
             if (media.type === "image" && value === "image") {
               return (
                 <Grid.Col key={media.id} span={{ base: 12, md: 4, lg: 3 }}>
-                  <Card
-                    shadow="sm"
-                    padding={4}
-                    radius="md"
-                    withBorder
-                    style={{ overflow: "hidden" }}
-                  >
+                  <Card shadow="sm" padding={4} radius="md" withBorder>
                     <Card.Section>
                       <AspectRatio ratio={16 / 9}>
                         <Image
-                          src={media.url}
+                          src={`http://localhost:4000/public${media.url}`}
                           alt={media.caption || "Ảnh kỷ niệm"}
                           h={240}
                           fit="cover"
                           style={{ cursor: "zoom-in" }}
                           onClick={() => {
                             setPreview({
-                              url: media.url,
+                              url: `http://localhost:4000/public${media.url}`,
                             });
                             setPreviewOpen(true);
                           }}
@@ -152,17 +159,11 @@ export default function PhotosHome() {
             if (media.type === "video" && value === "video") {
               return (
                 <Grid.Col key={media.id} span={{ base: 12, md: 6, lg: 6 }}>
-                  <Card
-                    shadow="sm"
-                    padding={4}
-                    radius="md"
-                    withBorder
-                    style={{ overflow: "hidden" }}
-                  >
+                  <Card shadow="sm" padding={4} radius="md" withBorder>
                     <Card.Section>
                       <AspectRatio>
                         <video
-                          src={media.url}
+                          src={`http://localhost:4000/public${media.url}`}
                           controls
                           playsInline
                           preload="false"
@@ -184,6 +185,7 @@ export default function PhotosHome() {
           })}
         </Grid>
       </Modal>
+
       <Modal
         opened={previewOpen}
         onClose={() => setPreviewOpen(false)}

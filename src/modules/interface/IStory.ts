@@ -1,6 +1,7 @@
 export type MediaKind = "image" | "video";
 
 export interface MediaItem {
+  id: string | number;
   url: string;
   type: MediaKind; // "image" | "video"
   caption?: string;
@@ -28,7 +29,7 @@ export const STORY_TAGS = [
 export type StoryTag = (typeof STORY_TAGS)[number];
 
 export interface IStory {
-  id: number;
+  id: string;
   title: string;
   date: Date;
   coverImage: string;
