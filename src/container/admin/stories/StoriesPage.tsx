@@ -9,7 +9,6 @@ import { IStory, StoryDetailBlock } from "@/modules/interface/IStory";
 import CreateUpdateStoryModal from "./CreateUpdateStoryModal";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import StoryViewerModal from "./StoryViewerModal";
-import { showNotification } from "@mantine/notifications";
 import { IconCheck, IconX } from "@tabler/icons-react";
 
 /**
@@ -88,21 +87,8 @@ export default function StoriesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
-      showNotification({
-        title: "Tạo thành công",
-        message: "Câu chuyện đã được tạo.",
-        color: "green",
-        icon: <IconCheck />,
-      });
     },
-    onError: (err: any) => {
-      showNotification({
-        title: "Tạo thất bại",
-        message: err?.message || "Không thể tạo câu chuyện.",
-        color: "red",
-        icon: <IconX />,
-      });
-    },
+    onError: (err: any) => {},
   });
 
   // mutation: update
@@ -134,21 +120,8 @@ export default function StoriesPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
-      showNotification({
-        title: "Cập nhật thành công",
-        message: "Câu chuyện đã được cập nhật.",
-        color: "green",
-        icon: <IconCheck />,
-      });
     },
-    onError: (err: any) => {
-      showNotification({
-        title: "Cập nhật thất bại",
-        message: err?.message || "Không thể cập nhật câu chuyện.",
-        color: "red",
-        icon: <IconX />,
-      });
-    },
+    onError: (err: any) => {},
   });
 
   // mutation: delete
@@ -182,21 +155,8 @@ export default function StoriesPage() {
       if (context?.previous) {
         queryClient.setQueryData(["stories"], context.previous);
       }
-      showNotification({
-        title: "Xóa thất bại",
-        message: (err as Error).message || "Không thể xóa câu chuyện.",
-        color: "red",
-        icon: <IconX />,
-      });
     },
-    onSuccess: () => {
-      showNotification({
-        title: "Đã xóa",
-        message: "Câu chuyện đã được xóa.",
-        color: "green",
-        icon: <IconCheck />,
-      });
-    },
+    onSuccess: () => {},
     onSettled: () => {
       // always refetch latest
       queryClient.invalidateQueries({ queryKey: ["stories"] });
@@ -342,12 +302,6 @@ export default function StoriesPage() {
       queryKey: ["story-details"],
     });
     queryClient.invalidateQueries({ queryKey: ["stories"] });
-    showNotification({
-      title: "Đã thêm chi tiết",
-      message: "Chi tiết đã được thêm vào câu chuyện.",
-      color: "green",
-      icon: <IconCheck />,
-    });
   };
 
   if (isLoading)
