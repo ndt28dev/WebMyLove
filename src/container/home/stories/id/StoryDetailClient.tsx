@@ -58,12 +58,13 @@ function NarrativeBlock({
                 alt={media[0].caption || block.title || "photo"}
                 fit="cover"
                 onClick={() => onPreview(media[0])}
-                style={{ cursor: "zoom-in" }}
+                style={{ cursor: "zoom-in", borderRadius: 8 }}
               />
             ) : (
               <video
                 src={`http://localhost:4000/public${media[0].url}`}
                 controls
+                style={{ borderRadius: 8 }}
               />
             )}
           </AspectRatio>
@@ -86,11 +87,13 @@ function NarrativeBlock({
                     src={`http://localhost:4000/public${m.url}`}
                     alt="photo"
                     fit="cover"
+                    style={{ cursor: "zoom-in", borderRadius: 8 }}
                   />
                 ) : (
                   <video
                     src={`http://localhost:4000/public${m.url}`}
                     controls
+                    style={{ borderRadius: 8 }}
                   />
                 )}
               </AspectRatio>

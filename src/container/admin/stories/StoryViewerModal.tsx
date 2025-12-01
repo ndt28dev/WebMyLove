@@ -1,7 +1,6 @@
-// src/components/StoryViewerModal.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Stack,
   Title,
@@ -39,6 +38,16 @@ type Props = {
 
 const DETAILS_URL_BASE = "http://localhost:4000/api";
 
+/** Local state type for media entries in the form */
+type MediaState = MediaItem & {
+  id?: number | null; // optional, backend id nếu có
+  url: string;
+  type: MediaKind | "image" | "video";
+  caption?: string | null;
+  file?: File | null;
+  previewUrl?: string | null;
+};
+
 export default function StoryViewerModal({
   album,
   onAddDetail,
@@ -50,20 +59,15 @@ export default function StoryViewerModal({
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
 
-  // mediaList sử dụng cho form thêm / sửa
-  // ensure MediaItem may contain id from server
-  const [mediaList, setMediaList] = useState<
-    (MediaItem & {
-      id?: number;
-      file?: File | null;
-      previewUrl?: string | null;
-    })[]
-  >([]);
+  const [mediaList, setMediaList] = useState<MediaState[]>([]);
 
-  // danh sách id media đã bị xóa trong quá trình edit -> gửi cho backend
+  const mediaListRef = useRef<MediaState[]>(mediaList);
+  useEffect(() => {
+    mediaListRef.current = mediaList;
+  }, [mediaList]);
+
   const [removedMediaIds, setRemovedMediaIds] = useState<number[]>([]);
 
-  // localDetails chứa dữ liệu lấy từ API (list của StoryDetailBlock)
   const [localDetails, setLocalDetails] = useState<StoryDetailBlock[]>([]);
 
   const [isLoadingDetails, setIsLoadingDetails] = useState(false);
@@ -72,20 +76,28 @@ export default function StoryViewerModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // ✨ mới: state cho chi tiết đang sửa (null = đang thêm mới)
   const [editingDetail, setEditingDetail] = useState<StoryDetailBlock | null>(
     null
   );
 
-  // cleanup object URLs on unmount
+  // cleanup object URLs on unmount using ref (avoid adding mediaList to deps)
   useEffect(() => {
     return () => {
-      mediaList.forEach((m) => {
-        if (m.previewUrl && m.previewUrl.startsWith("blob:"))
-          URL.revokeObjectURL(m.previewUrl);
-      });
+      try {
+        mediaListRef.current.forEach((m) => {
+          if (m.previewUrl && m.previewUrl.startsWith("blob:")) {
+            try {
+              URL.revokeObjectURL(m.previewUrl);
+            } catch (e) {
+              /* ignore */
+            }
+          }
+        });
+      } catch (e) {
+        /* ignore */
+      }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // empty deps -> run only on unmount
   }, []);
 
   // Fetch details when modal opens or album changes
@@ -113,7 +125,7 @@ export default function StoryViewerModal({
             (body && (body.message || body.error)) || `HTTP ${resp.status}`;
           throw new Error(msg);
         }
-        const json = await resp.json();
+        const json = await resp.json().catch(() => null);
         let details: StoryDetailBlock[] = [];
 
         if (json && json.data) {
@@ -147,19 +159,24 @@ export default function StoryViewerModal({
   const handleAddMedia = () => {
     setMediaList((prev) => [
       ...prev,
-      { url: "", type: "image", caption: "", file: null, previewUrl: null },
+      {
+        id: prev.length + 1, // or any other unique identifier
+        url: "",
+        type: "image",
+        caption: "",
+        file: null,
+        previewUrl: null,
+      },
     ]);
   };
 
   const handleFileChange = (idx: number, file: File | null) => {
     setMediaList((prev) => {
       const next = [...prev];
-      if (next[idx]?.previewUrl) {
-        // nếu đây là preview blob object, revoke; (nếu là url remote không revoke)
+      const old = next[idx];
+      if (old?.previewUrl && old.previewUrl.startsWith("blob:")) {
         try {
-          if (next[idx].previewUrl?.startsWith("blob:")) {
-            URL.revokeObjectURL(next[idx].previewUrl!);
-          }
+          URL.revokeObjectURL(old.previewUrl);
         } catch (e) {
           /* ignore */
         }
@@ -171,8 +188,9 @@ export default function StoryViewerModal({
           ...next[idx],
           file,
           previewUrl: obj,
+          // keep existing url (in case user edits url field)
           url: next[idx].url || "",
-          type: typeFromFile, // ✅ ép type từ file
+          type: typeFromFile,
         };
       } else {
         next[idx] = { ...next[idx], file: null, previewUrl: null };
@@ -188,7 +206,7 @@ export default function StoryViewerModal({
   ) => {
     setMediaList((prev) => {
       const next = [...prev];
-      next[idx] = { ...next[idx], [key]: value } as any;
+      next[idx] = { ...next[idx], [key]: value } as MediaState;
       return next;
     });
   };
@@ -197,17 +215,17 @@ export default function StoryViewerModal({
     setMediaList((prev) => {
       const next = [...prev];
       const item = next[idx];
-      // nếu media có id (tồn tại server), đánh dấu xóa để gửi backend
       if (item?.id) {
         setRemovedMediaIds((prevIds) =>
           Array.from(new Set([...prevIds, item.id!]))
         );
       }
-      if (item?.previewUrl) {
+      if (item?.previewUrl && item.previewUrl.startsWith("blob:")) {
         try {
-          if (item.previewUrl.startsWith("blob:"))
-            URL.revokeObjectURL(item.previewUrl);
-        } catch (e) {}
+          URL.revokeObjectURL(item.previewUrl);
+        } catch (e) {
+          /* ignore */
+        }
       }
       next.splice(idx, 1);
       return next;
@@ -215,12 +233,15 @@ export default function StoryViewerModal({
   };
 
   const resetForm = () => {
-    mediaList.forEach((m) => {
-      try {
-        if (m.previewUrl && m.previewUrl.startsWith("blob:"))
-          URL.revokeObjectURL(m.previewUrl);
-      } catch (e) {}
-    });
+    try {
+      mediaListRef.current.forEach((m) => {
+        if (m.previewUrl && m.previewUrl.startsWith("blob:")) {
+          try {
+            URL.revokeObjectURL(m.previewUrl);
+          } catch (e) {}
+        }
+      });
+    } catch (e) {}
     setTitle("");
     setDescription("");
     setMediaList([]);
@@ -230,25 +251,38 @@ export default function StoryViewerModal({
     setRemovedMediaIds([]);
   };
 
-  // ✨ Mở modal sửa, điền dữ liệu sẵn vào form
+  // open edit modal and populate form
   const handleEditDetail = (detail: StoryDetailBlock) => {
     setEditingDetail(detail);
     setTitle(detail.title ?? "");
     setDescription(detail.description ?? "");
-    // chuyển media từ server -> mediaList (previewUrl trỏ tới public path nếu có)
     const publicRoot = DETAILS_URL_BASE.replace("/api", "");
-    const mapped = (detail.media ?? []).map((m) => ({
-      // keep id if backend returned it (important for update)
-      id: (m as any).id,
-      url: m.url ?? "",
-      caption: m.caption ?? "",
-      // prefer m.type, fallback to m.media_type, default image
-      type: (m as any).type ?? (m as any).media_type ?? "image",
-      file: null,
-      // preview points to public path (not blob)
-      previewUrl: m.url ? `${publicRoot}/public/${m.url}` : null,
-    }));
-    setMediaList(mapped as any);
+    const mapped: MediaState[] = (detail.media ?? []).map((m) => {
+      // compute previewUrl: if m.url looks absolute -> use as-is, else build from publicRoot
+      const rawUrl = (m as any).url ?? "";
+      let previewUrl: string | null = null;
+      if (rawUrl) {
+        if (/^https?:\/\//i.test(rawUrl)) {
+          previewUrl = rawUrl;
+        } else {
+          // avoid accidental double /public segments
+          const candidate = `${publicRoot.replace(
+            /\/$/,
+            ""
+          )}/public/${rawUrl.replace(/^\//, "")}`;
+          previewUrl = candidate;
+        }
+      }
+      return {
+        id: (m as any).id ?? null,
+        url: rawUrl,
+        caption: (m as any).caption ?? "",
+        type: (m as any).type ?? (m as any).media_type ?? "image",
+        file: null,
+        previewUrl,
+      } as MediaState;
+    });
+    setMediaList(mapped);
     setRemovedMediaIds([]);
     setAddModalOpen(true);
   };
@@ -261,7 +295,7 @@ export default function StoryViewerModal({
       return;
     }
 
-    const sanitized = mediaList
+    const sanitized: MediaState[] = mediaList
       .map((m) => {
         let finalType: MediaKind = "image";
         if (m.file) {
@@ -277,22 +311,20 @@ export default function StoryViewerModal({
         }
 
         return {
-          id: (m as any).id, // may be undefined for new items
+          id: m.id ?? undefined,
           url: (m.url || "").trim(),
           type: finalType,
           caption: (m.caption || "").trim(),
           file: m.file ?? null,
           previewUrl: m.previewUrl ?? null,
-        };
+        } as MediaState;
       })
-      // keep only items that have url (existing) or a file (new)
       .filter((m) => m.url || m.file);
 
     const payloadJson = {
       story_id: album.id,
       title: title?.trim() || null,
       description: description?.trim() || null,
-      // include id for existing media so backend can match by id when updating
       mediaList: sanitized.map((m) => ({
         id: m.id ?? undefined,
         url: m.url || null,
@@ -313,29 +345,22 @@ export default function StoryViewerModal({
         : `${DETAILS_URL_BASE}/story-details`;
 
       if (hasFile) {
-        // Build FormData: files + mediaMeta + removedMediaIds + story fields
         const form = new FormData();
         form.append("story_id", String(payloadJson.story_id));
         if (payloadJson.title) form.append("title", payloadJson.title);
         if (payloadJson.description)
           form.append("description", payloadJson.description);
 
-        // attach files in the same order as they appear in sanitized.filter(m => m.file)
         const filesForUpload = sanitized.filter((m) => m.file);
         filesForUpload.forEach((m) => {
           if (m.file) form.append("mediaFiles", m.file, m.file.name);
         });
 
-        // We need mediaMeta that describes the full desired mediaList order.
-        // For items that are existing (have id), url will be present and file=null.
-        // For items that are new (have file) we include type/caption and id may be undefined.
         const mediaMeta = sanitized.map((m) => ({
           id: m.id ?? null,
           url: m.url || null,
           type: m.type,
           caption: m.caption || null,
-          // For new files, backend will consume files in the same order as filesForUpload.
-          // We don't include any file index here; backend should map by order of received files.
         }));
         form.append("mediaMeta", JSON.stringify(mediaMeta));
 
@@ -348,7 +373,6 @@ export default function StoryViewerModal({
           body: form,
         });
       } else {
-        // purely JSON update/create
         const body = {
           ...payloadJson,
         };
@@ -359,20 +383,21 @@ export default function StoryViewerModal({
         });
       }
 
-      const json = await resp!.json();
+      const json = await resp!.json().catch(() => null);
       if (!resp!.ok) {
         const serverMsg =
-          json && (json.message || (json.error && json.error.message));
-        throw new Error(serverMsg || `Server responded with ${resp!.status}`);
+          (json && (json.message || (json.error && json.error.message))) ||
+          `Server responded with ${resp!.status}`;
+        throw new Error(serverMsg);
       }
 
-      // Sau khi thêm/sửa xong → fetch lại toàn bộ chi tiết từ server
+      // refetch details to refresh UI
       const fetchResp = await fetch(
         `${DETAILS_URL_BASE}/story-details/story/${encodeURIComponent(
           album.id
         )}`
       );
-      const fetchJson = await fetchResp.json();
+      const fetchJson = await fetchResp.json().catch(() => null);
       let updatedDetails: StoryDetailBlock[] = [];
       if (fetchJson && fetchJson.data) {
         if (Array.isArray(fetchJson.data.details)) {
@@ -380,11 +405,13 @@ export default function StoryViewerModal({
         } else if (Array.isArray(fetchJson.data)) {
           updatedDetails = fetchJson.data;
         }
+      } else if (Array.isArray(fetchJson)) {
+        updatedDetails = fetchJson;
       }
 
       setLocalDetails(updatedDetails);
       try {
-        onAddDetail?.(updatedDetails[0]);
+        if (updatedDetails.length > 0) onAddDetail?.(updatedDetails[0]);
       } catch (e) {
         console.warn("onAddDetail callback failed:", e);
       }
@@ -407,20 +434,25 @@ export default function StoryViewerModal({
         method: "DELETE",
       });
 
-      const json = await resp.json();
+      const json = await resp.json().catch(() => null);
 
       if (!resp.ok) {
-        throw new Error(json.message || `Server responded with ${resp.status}`);
+        throw new Error(
+          (json && (json.message || json.error)) || `HTTP ${resp.status}`
+        );
       }
 
-      alert(json.message || "Đã xóa chi tiết thành công");
-      // Sau khi xóa → fetch lại toàn bộ chi tiết từ server
+      alert(
+        (json && (json.message || "Đã xóa chi tiết thành công")) ||
+          "Đã xóa chi tiết thành công"
+      );
+
       const fetchResp = await fetch(
         `${DETAILS_URL_BASE}/story-details/story/${encodeURIComponent(
           album?.id || ""
         )}`
       );
-      const fetchJson = await fetchResp.json();
+      const fetchJson = await fetchResp.json().catch(() => null);
       let updatedDetails: StoryDetailBlock[] = [];
       if (fetchJson && fetchJson.data) {
         if (Array.isArray(fetchJson.data.details)) {
@@ -428,18 +460,19 @@ export default function StoryViewerModal({
         } else if (Array.isArray(fetchJson.data)) {
           updatedDetails = fetchJson.data;
         }
+      } else if (Array.isArray(fetchJson)) {
+        updatedDetails = fetchJson;
       }
 
       setLocalDetails(updatedDetails);
     } catch (err: any) {
       console.error("Failed to delete story detail:", err);
-      alert(err.message || "Lỗi khi xóa chi tiết. Vui lòng thử lại.");
+      alert(err?.message || "Lỗi khi xóa chi tiết. Vui lòng thử lại.");
     }
   };
 
   return (
     <>
-      {/* Modal chính */}
       <Modal
         opened={opened}
         onClose={onClose}
@@ -470,7 +503,6 @@ export default function StoryViewerModal({
 
           <Divider />
 
-          {/* Hiển thị các detail lấy từ API */}
           <Stack gap="sm">
             {isLoadingDetails ? (
               <Group mt="md">
@@ -493,7 +525,6 @@ export default function StoryViewerModal({
                           )}
                         </Stack>
                         <Group gap={5}>
-                          {/* ✨ nút edit — gọi handleEditDetail */}
                           <ActionIcon
                             color="yellow"
                             onClick={() => handleEditDetail(d)}
@@ -513,7 +544,12 @@ export default function StoryViewerModal({
                       {d.media && d.media.length > 0 && (
                         <SimpleGrid cols={3} spacing="xs" mt="sm">
                           {d.media.map((m, i) => (
-                            <Card key={i} padding={6} radius="md" withBorder>
+                            <Card
+                              key={m.id ?? i}
+                              padding={6}
+                              radius="md"
+                              withBorder
+                            >
                               {m.url ? (
                                 m.type === "image" ? (
                                   <Image
@@ -583,7 +619,6 @@ export default function StoryViewerModal({
         </Stack>
       </Modal>
 
-      {/* Modal phụ: thêm / sửa chi tiết */}
       <Modal
         opened={addModalOpen}
         onClose={() => {
@@ -621,12 +656,16 @@ export default function StoryViewerModal({
               <Button
                 variant="outline"
                 onClick={() => {
-                  mediaList.forEach((m) => {
-                    try {
-                      if (m.previewUrl && m.previewUrl.startsWith("blob:"))
-                        URL.revokeObjectURL(m.previewUrl);
-                    } catch (e) {}
-                  });
+                  // revoke blob urls
+                  try {
+                    mediaList.forEach((m) => {
+                      if (m.previewUrl && m.previewUrl.startsWith("blob:")) {
+                        try {
+                          URL.revokeObjectURL(m.previewUrl);
+                        } catch (e) {}
+                      }
+                    });
+                  } catch (e) {}
                   setMediaList([]);
                   setRemovedMediaIds([]);
                 }}
@@ -638,12 +677,12 @@ export default function StoryViewerModal({
 
           <Stack>
             {mediaList.map((m, idx) => (
-              <Card key={idx} shadow="sm" padding="sm" radius="md">
+              <Card key={m.id ?? idx} shadow="sm" padding="sm" radius="md">
                 <Group align="center" gap="sm">
                   <Box style={{ width: 120 }}>
                     <FileInput
                       placeholder="Chọn file"
-                      value={undefined}
+                      value={m.file ?? null}
                       onChange={(file) => handleFileChange(idx, file)}
                       accept="image/*,video/*"
                       clearable
@@ -660,7 +699,7 @@ export default function StoryViewerModal({
                         />
                       ) : (
                         <video
-                          src={m.previewUrl}
+                          src={m.previewUrl ?? undefined}
                           height={80}
                           style={{ display: "block", marginTop: 8, width: 120 }}
                           controls
@@ -687,7 +726,7 @@ export default function StoryViewerModal({
                     onChange={(val) =>
                       handleMediaChange(idx, "type", val ?? "image")
                     }
-                    disabled={!!m.file} // disable khi đã chọn file
+                    disabled={!!m.file}
                   />
 
                   <ActionIcon
