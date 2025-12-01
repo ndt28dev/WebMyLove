@@ -69,6 +69,10 @@ export function MyTimeline({
       lineWidth={3}
     >
       {loveTimelineData.map((item, idx) => {
+        if (!item || !item.icon) {
+          // handle the case where item or item.icon is undefined
+          return null; // or some other fallback UI
+        }
         const colorToken = iconColorMapper[item.icon];
 
         return (
