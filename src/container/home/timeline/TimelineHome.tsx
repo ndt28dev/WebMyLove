@@ -64,9 +64,12 @@ export default function TimelineHome() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://localhost:4000/api/timeline", {
-          signal: ctrl.signal,
-        });
+        const res = await fetch(
+          "https://my-love-backend-production-6dbc.up.railway.app/api/timeline",
+          {
+            signal: ctrl.signal,
+          }
+        );
         if (!res.ok) {
           throw new Error(`HTTP ${res.status} ${res.statusText}`);
         }
@@ -222,7 +225,7 @@ export default function TimelineHome() {
                   >
                     {current?.type === "image" ? (
                       <img
-                        src={`http://localhost:4000/public${current?.url}`}
+                        src={`https://my-love-backend-production-6dbc.up.railway.app/public${current?.url}`}
                         alt={current.caption || activeItem.title}
                         style={{
                           width: "100%",
@@ -235,7 +238,7 @@ export default function TimelineHome() {
                     ) : (
                       <Flex direction="column" justify="center" h="600px">
                         <video
-                          src={`http://localhost:4000/public${current?.url}`}
+                          src={`https://my-love-backend-production-6dbc.up.railway.app/public${current?.url}`}
                           controls
                           playsInline
                           preload="metadata"

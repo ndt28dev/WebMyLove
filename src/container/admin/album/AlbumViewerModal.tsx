@@ -55,7 +55,7 @@ export default function AlbumViewerModal({
   onClose,
   album,
   onSave,
-  imageBaseUrl = "http://localhost:4000/public",
+  imageBaseUrl = "https://my-love-backend-production-6dbc.up.railway.app/public",
 }: Props) {
   const [localMedia, setLocalMedia] = useState<AlbumMedia[]>([]);
   const [activePreview, setActivePreview] = useState<AlbumMedia | null>(null);
@@ -77,7 +77,7 @@ export default function AlbumViewerModal({
     const fetchMedia = async () => {
       try {
         const res = await fetch(
-          `http://localhost:4000/api/photo-album/${album.id}`
+          `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${album.id}`
         );
         if (!res.ok) throw new Error("Không lấy được media album");
 
@@ -173,7 +173,9 @@ export default function AlbumViewerModal({
 
     try {
       const res = await fetch(
-        `http://localhost:4000/api/photo-album/${encodeURIComponent(idStr)}`,
+        `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${encodeURIComponent(
+          idStr
+        )}`,
         { method: "DELETE" }
       );
       if (!res.ok) {
@@ -232,7 +234,7 @@ export default function AlbumViewerModal({
       let bulkOk = false;
       try {
         const resBulk = await fetch(
-          `http://localhost:4000/api/photo-album/photo/${encodeURIComponent(
+          `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/photo/${encodeURIComponent(
             String(album.id)
           )}`,
           { method: "DELETE" }
@@ -251,7 +253,7 @@ export default function AlbumViewerModal({
         for (const p of persisted) {
           try {
             const res = await fetch(
-              `http://localhost:4000/api/photo-album/${encodeURIComponent(
+              `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${encodeURIComponent(
                 String(p.id)
               )}`,
               { method: "DELETE" }
@@ -273,7 +275,7 @@ export default function AlbumViewerModal({
       // try to refetch to restore UI
       try {
         const res = await fetch(
-          `http://localhost:4000/api/photo-album/${encodeURIComponent(
+          `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${encodeURIComponent(
             String(album.id)
           )}`
         );
@@ -325,10 +327,13 @@ export default function AlbumViewerModal({
 
     try {
       // call backend endpoint that replaces media for album
-      const res = await fetch(`http://localhost:4000/api/photo-album`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       if (!res.ok) {
         const txt = await res.text().catch(() => res.statusText);
         throw new Error(txt || "Lưu thất bại");

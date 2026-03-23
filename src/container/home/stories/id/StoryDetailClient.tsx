@@ -23,7 +23,8 @@ import type {
 } from "@/modules/interface/IStory";
 import { formatDate } from "@/utils/Format";
 
-const API_BASE = "http://localhost:4000/api/stories";
+const API_BASE =
+  "https://my-love-backend-production-6dbc.up.railway.app/api/stories";
 
 function FullBleed({ children }: { children: React.ReactNode }) {
   return (
@@ -54,7 +55,7 @@ function NarrativeBlock({
           <AspectRatio ratio={16 / 9}>
             {media[0].type === "image" ? (
               <Image
-                src={`http://localhost:4000/public${media[0].url}`}
+                src={`https://my-love-backend-production-6dbc.up.railway.app/public${media[0].url}`}
                 alt={media[0].caption || block.title || "photo"}
                 fit="cover"
                 onClick={() => onPreview(media[0])}
@@ -62,7 +63,7 @@ function NarrativeBlock({
               />
             ) : (
               <video
-                src={`http://localhost:4000/public${media[0].url}`}
+                src={`https://my-love-backend-production-6dbc.up.railway.app/public${media[0].url}`}
                 controls
                 style={{ borderRadius: 8 }}
               />
@@ -84,14 +85,14 @@ function NarrativeBlock({
               >
                 {m.type === "image" ? (
                   <Image
-                    src={`http://localhost:4000/public${m.url}`}
+                    src={`https://my-love-backend-production-6dbc.up.railway.app/public${m.url}`}
                     alt="photo"
                     fit="cover"
                     style={{ cursor: "zoom-in", borderRadius: 8 }}
                   />
                 ) : (
                   <video
-                    src={`http://localhost:4000/public${m.url}`}
+                    src={`https://my-love-backend-production-6dbc.up.railway.app/public${m.url}`}
                     controls
                     style={{ borderRadius: 8 }}
                   />
@@ -176,7 +177,7 @@ export default function StoryDetailClient({ id }: { id: string }) {
 
         <AspectRatio ratio={16 / 9}>
           <Image
-            src={`http://localhost:4000/public${story.coverImage}`}
+            src={`https://my-love-backend-production-6dbc.up.railway.app/public${story.coverImage}`}
             alt={story.title}
             fit="cover"
             radius="md"
@@ -200,7 +201,7 @@ export default function StoryDetailClient({ id }: { id: string }) {
         >
           {preview && (
             <Image
-              src={`http://localhost:4000/public${preview.url}`}
+              src={`https://my-love-backend-production-6dbc.up.railway.app/public${preview.url}`}
               alt={preview.caption || story.title}
               fit="contain"
               onClick={() => setPreviewOpen(false)}

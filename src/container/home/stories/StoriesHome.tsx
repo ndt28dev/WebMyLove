@@ -153,7 +153,7 @@ function StoryCard({ story }: { story: IStory }) {
     >
       <CardSection style={{ position: "relative", height: 240 }}>
         <BackgroundImage
-          src={`http://localhost:4000/public${story.coverImage}`}
+          src={`https://my-love-backend-production-6dbc.up.railway.app/public${story.coverImage}`}
           h="100%"
           style={{
             transition: "transform .3s ease",
@@ -211,7 +211,7 @@ function StoryCard({ story }: { story: IStory }) {
 }
 
 export default function StoriesGridTwoPerRow({
-  apiUrl = "http://localhost:4000/api/stories",
+  apiUrl = "https://my-love-backend-production-6dbc.up.railway.app/api/stories",
 }: {
   apiUrl?: string;
 }) {

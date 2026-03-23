@@ -100,7 +100,7 @@ export default function CreateUpdateStoryModal({
       if (story.coverImage) {
         const src = story.coverImage.startsWith("http")
           ? story.coverImage
-          : `http://localhost:4000/public${story.coverImage}`;
+          : `https://my-love-backend-production-6dbc.up.railway.app/public${story.coverImage}`;
         setPreview(src);
       } else {
         setPreview(null);

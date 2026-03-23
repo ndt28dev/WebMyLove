@@ -15,9 +15,12 @@ import { IconCheck, IconX } from "@tabler/icons-react";
  * Helper: call delete API
  */
 async function deleteStoryApi(id: number | string) {
-  const res = await fetch(`http://localhost:4000/api/stories/${id}`, {
-    method: "DELETE",
-  });
+  const res = await fetch(
+    `https://my-love-backend-production-6dbc.up.railway.app/api/stories/${id}`,
+    {
+      method: "DELETE",
+    }
+  );
   const json = await res.json().catch(() => null);
   if (!res.ok) {
     const msg = (json && (json.message || json.error)) || `HTTP ${res.status}`;
@@ -44,7 +47,9 @@ export default function StoriesPage() {
   } = useQuery<IStory[]>({
     queryKey: ["stories"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:4000/api/stories");
+      const res = await fetch(
+        "https://my-love-backend-production-6dbc.up.railway.app/api/stories"
+      );
       const json = await res.json().catch(() => null);
       if (!res.ok) {
         const txt =
@@ -67,16 +72,22 @@ export default function StoriesPage() {
     ) => {
       let res: Response;
       if (payload instanceof FormData) {
-        res = await fetch("http://localhost:4000/api/stories", {
-          method: "POST",
-          body: payload,
-        });
+        res = await fetch(
+          "https://my-love-backend-production-6dbc.up.railway.app/api/stories",
+          {
+            method: "POST",
+            body: payload,
+          }
+        );
       } else {
-        res = await fetch("http://localhost:4000/api/stories", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        res = await fetch(
+          "https://my-love-backend-production-6dbc.up.railway.app/api/stories",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
       }
       const json = await res.json().catch(() => null);
       if (!res.ok) {
@@ -100,16 +111,22 @@ export default function StoriesPage() {
       const { id, payload } = args;
       let res: Response;
       if (payload instanceof FormData) {
-        res = await fetch(`http://localhost:4000/api/stories/${id}`, {
-          method: "PUT",
-          body: payload,
-        });
+        res = await fetch(
+          `https://my-love-backend-production-6dbc.up.railway.app/api/stories/${id}`,
+          {
+            method: "PUT",
+            body: payload,
+          }
+        );
       } else {
-        res = await fetch(`http://localhost:4000/api/stories/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        res = await fetch(
+          `https://my-love-backend-production-6dbc.up.railway.app/api/stories/${id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
       }
       const json = await res.json().catch(() => null);
       if (!res.ok) {
@@ -186,7 +203,7 @@ export default function StoriesPage() {
             ? "/placeholder.png"
             : cover.startsWith("http")
             ? cover
-            : `http://localhost:4000/public${cover}`;
+            : `https://my-love-backend-production-6dbc.up.railway.app/public${cover}`;
         return (
           <Image
             src={src}
