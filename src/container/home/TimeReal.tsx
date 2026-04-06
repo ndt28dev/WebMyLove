@@ -129,20 +129,34 @@ export default function TimeReal() {
         )}
       </Flex>
 
-      {/* 👇 Thêm phần text bên dưới */}
-      <Stack align="center" gap={4} mt="md">
-        <Group gap={6}>
-          <IconMoodCry size={20} color="gray" />
-          <Text c="gray" fw={600}>
-            Đã dừng lại rồi huhu
-          </Text>
-        </Group>
+      <Paper
+        mt="md"
+        p="lg"
+        radius="xl"
+        shadow="lg"
+        style={{
+          background: "linear-gradient(135deg, #ffe4ec, #fff0f6)",
+          border: "2px solid #ff85a2",
+          textAlign: "center",
+        }}
+      >
+        <Stack align="center" gap={8}>
+          <Group gap={8}>
+            <IconMoodCry size={28} color="#ff4d6d" />
+            <Text fw={800} fz="xl" c="#d6336c">
+              Đã dừng lại rồi huhu
+            </Text>
+          </Group>
 
-        <Text c="dimmed" fz="lg" ta="center">
-          Hiện tại chỉ cập nhật đến ngày 13 tháng 9 năm 2025, sẽ cập nhật sớm
-          vào thời gian tới
-        </Text>
-      </Stack>
+          <Text fz="md" c="dimmed" fw={500}>
+            Hiện tại chỉ cập nhật đến{" "}
+            <Text span fw={700} c="#e64980">
+              ngày 13 tháng 9 năm 2025
+            </Text>
+            , sẽ cập nhật sớm vào thời gian tới
+          </Text>
+        </Stack>
+      </Paper>
     </Stack>
   );
 }
