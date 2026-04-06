@@ -196,12 +196,12 @@ export default function AlbumPage() {
                 <IconEdit size={16} />
               </ActionIcon>
 
-              <ActionIcon
+              {/* <ActionIcon
                 color="red"
                 onClick={() => deleteAlbum(row.id, queryClient)}
               >
                 <IconTrash size={16} />
-              </ActionIcon>
+              </ActionIcon> */}
             </Group>
           )}
         />

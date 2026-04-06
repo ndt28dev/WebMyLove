@@ -156,12 +156,12 @@ export default function TimelinePage() {
             >
               <IconEdit size={16} />
             </ActionIcon>
-            <ActionIcon
+            {/* <ActionIcon
               color="red"
               onClick={() => deleteTimeline(row.id, queryClient)}
             >
               <IconTrash size={16} />
-            </ActionIcon>
+            </ActionIcon> */}
           </Group>
         )}
       />

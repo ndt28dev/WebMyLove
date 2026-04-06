@@ -373,9 +373,9 @@ export default function StoriesPage() {
               >
                 <IconEdit size={16} />
               </ActionIcon>
-              <ActionIcon color="red" onClick={() => handleDelete(row.id)}>
+              {/* <ActionIcon color="red" onClick={() => handleDelete(row.id)}>
                 <IconTrash size={16} />
-              </ActionIcon>
+              </ActionIcon> */}
             </Group>
           )}
         />
