@@ -15,7 +15,7 @@ import { useState } from "react";
 import AlbumViewerModal from "./AlbumViewerModal";
 
 const DETAILS_URL_BASE =
-  "https://my-love-backend-production-6dbc.up.railway.app/api";
+  "https://mylove-backend-server-production.up.railway.app/api";
 
 const fetchPhotos = async (): Promise<IPhotoAlbum[]> => {
   const res = await fetch(`${DETAILS_URL_BASE}/photos`);

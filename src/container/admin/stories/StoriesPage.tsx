@@ -16,7 +16,7 @@ import { IconCheck, IconX } from "@tabler/icons-react";
  */
 async function deleteStoryApi(id: number | string) {
   const res = await fetch(
-    `https://my-love-backend-production-6dbc.up.railway.app/api/stories/${id}`,
+    `https://mylove-backend-server-production.up.railway.app/api/stories/${id}`,
     {
       method: "DELETE",
     }
@@ -48,7 +48,7 @@ export default function StoriesPage() {
     queryKey: ["stories"],
     queryFn: async () => {
       const res = await fetch(
-        "https://my-love-backend-production-6dbc.up.railway.app/api/stories"
+        "https://mylove-backend-server-production.up.railway.app/api/stories"
       );
       const json = await res.json().catch(() => null);
       if (!res.ok) {
@@ -73,7 +73,7 @@ export default function StoriesPage() {
       let res: Response;
       if (payload instanceof FormData) {
         res = await fetch(
-          "https://my-love-backend-production-6dbc.up.railway.app/api/stories",
+          "https://mylove-backend-server-production.up.railway.app/api/stories",
           {
             method: "POST",
             body: payload,
@@ -81,7 +81,7 @@ export default function StoriesPage() {
         );
       } else {
         res = await fetch(
-          "https://my-love-backend-production-6dbc.up.railway.app/api/stories",
+          "https://mylove-backend-server-production.up.railway.app/api/stories",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -112,7 +112,7 @@ export default function StoriesPage() {
       let res: Response;
       if (payload instanceof FormData) {
         res = await fetch(
-          `https://my-love-backend-production-6dbc.up.railway.app/api/stories/${id}`,
+          `https://mylove-backend-server-production.up.railway.app/api/stories/${id}`,
           {
             method: "PUT",
             body: payload,
@@ -120,7 +120,7 @@ export default function StoriesPage() {
         );
       } else {
         res = await fetch(
-          `https://my-love-backend-production-6dbc.up.railway.app/api/stories/${id}`,
+          `https://mylove-backend-server-production.up.railway.app/api/stories/${id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -203,7 +203,7 @@ export default function StoriesPage() {
             ? "/placeholder.png"
             : cover.startsWith("http")
             ? cover
-            : `https://my-love-backend-production-6dbc.up.railway.app/public${cover}`;
+            : `https://mylove-backend-server-production.up.railway.app/public${cover}`;
         return (
           <Image
             src={src}

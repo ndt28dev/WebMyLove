@@ -16,7 +16,7 @@ import { formatDate } from "@/utils/Format";
 import CreateUpdateTimelineModal from "./CreateUpdateTimelineModal";
 import TimelineViewerModal from "./TimelineViewerModal";
 
-const API_BASE = "https://my-love-backend-production-6dbc.up.railway.app/api";
+const API_BASE = "https://mylove-backend-server-production.up.railway.app/api";
 
 const fetchTimeline = async () => {
   const res = await fetch(`${API_BASE}/timeline`);

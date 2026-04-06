@@ -30,7 +30,7 @@ type Props = {
 
 const API_BASE =
   (process.env.NEXT_PUBLIC_API_BASE as string) ||
-  "https://my-love-backend-production-6dbc.up.railway.app";
+  "https://mylove-backend-server-production.up.railway.app";
 
 export default function TimelineViewerModal({
   opened,

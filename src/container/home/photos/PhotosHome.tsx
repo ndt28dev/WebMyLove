@@ -49,7 +49,7 @@ export default function PhotosHome() {
     queryKey: ["albums"],
     queryFn: async () => {
       const res = await fetch(
-        "https://my-love-backend-production-6dbc.up.railway.app/api/photos"
+        "https://mylove-backend-server-production.up.railway.app/api/photos"
       );
       if (!res.ok) throw new Error("Không lấy được dữ liệu photos");
       return res.json();
@@ -84,7 +84,7 @@ export default function PhotosHome() {
               style={{ cursor: "pointer", overflow: "hidden" }}
             >
               <Image
-                src={`https://my-love-backend-production-6dbc.up.railway.app/public${album.coverImage}`}
+                src={`https://mylove-backend-server-production.up.railway.app/public${album.coverImage}`}
                 alt={album.title}
                 height={300}
                 radius="sm"
@@ -139,14 +139,14 @@ export default function PhotosHome() {
                     <Card.Section>
                       <AspectRatio ratio={16 / 9}>
                         <Image
-                          src={`https://my-love-backend-production-6dbc.up.railway.app/public${media.url}`}
+                          src={`https://mylove-backend-server-production.up.railway.app/public${media.url}`}
                           alt={media.caption || "Ảnh kỷ niệm"}
                           h={240}
                           fit="cover"
                           style={{ cursor: "zoom-in" }}
                           onClick={() => {
                             setPreview({
-                              url: `https://my-love-backend-production-6dbc.up.railway.app/public${media.url}`,
+                              url: `https://mylove-backend-server-production.up.railway.app/public${media.url}`,
                             });
                             setPreviewOpen(true);
                           }}
@@ -165,7 +165,7 @@ export default function PhotosHome() {
                     <Card.Section>
                       <AspectRatio>
                         <video
-                          src={`https://my-love-backend-production-6dbc.up.railway.app/public${media.url}`}
+                          src={`https://mylove-backend-server-production.up.railway.app/public${media.url}`}
                           controls
                           playsInline
                           preload="false"

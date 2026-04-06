@@ -82,7 +82,7 @@ export default function CreateUpdateAlbumModal({
       // đặt existing url (đường dẫn tới server public)
       setExistingCoverUrl(
         defaultData.coverImage
-          ? `https://my-love-backend-production-6dbc.up.railway.app/public${defaultData.coverImage}`
+          ? `https://mylove-backend-server-production.up.railway.app/public${defaultData.coverImage}`
           : null
       );
       // xóa file upload cũ nếu có

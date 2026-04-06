@@ -55,7 +55,7 @@ export default function AlbumViewerModal({
   onClose,
   album,
   onSave,
-  imageBaseUrl = "https://my-love-backend-production-6dbc.up.railway.app/public",
+  imageBaseUrl = "https://mylove-backend-server-production.up.railway.app/public",
 }: Props) {
   const [localMedia, setLocalMedia] = useState<AlbumMedia[]>([]);
   const [activePreview, setActivePreview] = useState<AlbumMedia | null>(null);
@@ -77,7 +77,7 @@ export default function AlbumViewerModal({
     const fetchMedia = async () => {
       try {
         const res = await fetch(
-          `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${album.id}`
+          `https://mylove-backend-server-production.up.railway.app/api/photo-album/${album.id}`
         );
         if (!res.ok) throw new Error("Không lấy được media album");
 
@@ -173,7 +173,7 @@ export default function AlbumViewerModal({
 
     try {
       const res = await fetch(
-        `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${encodeURIComponent(
+        `https://mylove-backend-server-production.up.railway.app/api/photo-album/${encodeURIComponent(
           idStr
         )}`,
         { method: "DELETE" }
@@ -234,7 +234,7 @@ export default function AlbumViewerModal({
       let bulkOk = false;
       try {
         const resBulk = await fetch(
-          `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/photo/${encodeURIComponent(
+          `https://mylove-backend-server-production.up.railway.app/api/photo-album/photo/${encodeURIComponent(
             String(album.id)
           )}`,
           { method: "DELETE" }
@@ -253,7 +253,7 @@ export default function AlbumViewerModal({
         for (const p of persisted) {
           try {
             const res = await fetch(
-              `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${encodeURIComponent(
+              `https://mylove-backend-server-production.up.railway.app/api/photo-album/${encodeURIComponent(
                 String(p.id)
               )}`,
               { method: "DELETE" }
@@ -275,7 +275,7 @@ export default function AlbumViewerModal({
       // try to refetch to restore UI
       try {
         const res = await fetch(
-          `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album/${encodeURIComponent(
+          `https://mylove-backend-server-production.up.railway.app/api/photo-album/${encodeURIComponent(
             String(album.id)
           )}`
         );
@@ -328,7 +328,7 @@ export default function AlbumViewerModal({
     try {
       // call backend endpoint that replaces media for album
       const res = await fetch(
-        `https://my-love-backend-production-6dbc.up.railway.app/api/photo-album`,
+        `https://mylove-backend-server-production.up.railway.app/api/photo-album`,
         {
           method: "POST",
           body: formData,

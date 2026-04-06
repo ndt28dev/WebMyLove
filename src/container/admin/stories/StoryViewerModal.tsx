@@ -37,7 +37,7 @@ type Props = {
 };
 
 const DETAILS_URL_BASE =
-  "https://my-love-backend-production-6dbc.up.railway.app/api";
+  "https://mylove-backend-server-production.up.railway.app/api";
 
 /** Local state type for media entries in the form */
 type MediaState = MediaItem & {
